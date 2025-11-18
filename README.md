@@ -60,10 +60,17 @@ Bitsnbytes Quantization: [![Open in Colab](https://colab.research.google.com/ass
 
 ---
 
-### Week 3: RAG Memory & Semantic Cache
+### Week 3: Agentic RAG, RAG Memory & Semantic Cache
 
+- Naive RAG vs Agentic RAG
+- Agentic RAG Components
+- Advanced Agents
 - RAG Memory
 - Semantic Cache
+
+Upload Data to Qdrant: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hamzafarooq/multi-agent-course/blob/main/Module_1/Agentic_RAG/Upload_data_to_Qdrant_Notebook.ipynb)
+
+Agentic RAG: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hamzafarooq/multi-agent-course/blob/main/Module_1/Agentic_RAG/Agentic_RAG_Notebook.ipynb)
 
 Semantic Cache: [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hamzafarooq/multi-agent-course/blob/main/Module_3/Semantic_Cache/Semantic_cache_from_scratch.ipynb)
 

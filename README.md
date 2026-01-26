@@ -1,6 +1,6 @@
 # Agent Engineering Bootcamp: Developers Edition
 
-Welcome to the official course repository for **Enterprise RAG & Multi-Agent Applications**.
+Welcome to the official course repository for **Agent Engineering Bootcamp: Developers Edition**.
 
 This repo is for **enrolled students only** and contains all code, exercises, templates, and project materials used throughout the course.
 

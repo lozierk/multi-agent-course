@@ -37,34 +37,9 @@ Demonstrates real-time text streaming and inference performance benchmarking:
 
 *Results from `Maven_TextStreamer_Quantization.ipynb` using `Meta-Llama-3.1-8B-Instruct` on an NVIDIA A40 (48 GB VRAM) via [RunPod](https://www.runpod.io/).*
 
-## Requirements
-
-- Python 3.10.12
-- PyTorch with CUDA support
-- NVIDIA A40 GPU (or equivalent CUDA-capable GPU) — tested on [RunPod](https://www.runpod.io/)
-
-### Python packages
-
-```
-transformers
-bitsandbytes
-accelerate
-peft
-torch
-```
-
-Install from source for latest 4-bit quantization support:
-
-```bash
-pip install -U bitsandbytes
-pip install -U git+https://github.com/huggingface/transformers.git
-pip install -U git+https://github.com/huggingface/peft.git
-pip install -U git+https://github.com/huggingface/accelerate.git
-```
-
 ## Usage
 
-1. Install the dependencies listed above
+1. Install the dependencies from requirements.txt
 2. Authenticate with Hugging Face Hub (required for gated models like Llama):
    ```python
    from huggingface_hub import notebook_login

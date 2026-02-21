@@ -1,5 +1,6 @@
 """
 rag_helpers.py — Helper functions for Agentic RAG with Semantic Cache
+These are the helper functions for the Agentic RAG with Semantic Cache notebook.
 
 All heavy lifting lives here so the notebook stays clean and focused
 on demonstrating the system behaviour.

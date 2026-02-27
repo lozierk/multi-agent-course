@@ -32,9 +32,10 @@ Module_3_Agentic_RAG/
 ├── Semantic_Cache/
 │   └── Semantic_cache_from_scratch.ipynb     # Build a semantic cache from the ground up
 │
-├── Agentic_RAG_with_Semantic_Cache.ipynb     # Combined: agentic RAG + semantic cache layer
+├── rag_helpers.py                            # Shared helpers — all pipeline logic for notebook 4
+├── Agentic_RAG_with_Semantic_Cache.ipynb     # Combined: agentic RAG + semantic cache (minimal notebook)
 │
-└── .env                                      # API keys (OpenAI, SerpApi, Traversaal Pro, ARES)
+└── .env                                      # API keys (OpenAI, SerpApi, Traversaal Pro)
 ```
 
 ---
@@ -78,7 +79,7 @@ The core of this module. This notebook introduces **agentic decision-making** as
   OPENAI_QUERY     10K_DOCUMENT_QUERY    INTERNET_QUERY
          │                 │                  │
          ▼                 ▼                  ▼
-  Qdrant search     Qdrant search        ARES API
+  Qdrant search     Qdrant search        SerpApi
   (opnai_data)      (10k_data)          (live web)
          │                 │                  │
          └────────┬─────────┘                  │
@@ -99,13 +100,13 @@ The core of this module. This notebook introduces **agentic decision-making** as
 | `get_text_embeddings()` | Converts a query string to a 768-dim Nomic vector |
 | `retrieve_and_response()` | Async function — queries Qdrant (top-3 chunks) then calls the RAG generator |
 | `rag_formatted_response()` | Passes retrieved context to GPT-4 and asks it to answer with inline citations |
-| `get_internet_content()` | Calls the ARES live-search API for real-time answers |
+| `get_internet_content()` | Calls the SerpApi Google Search API for real-time answers |
 | `agentic_rag()` | Main orchestrator — ties routing, retrieval, and generation together |
 
 #### Data sources
 - **OpenAI documentation** — Agents, tools, chat completions, best practices
 - **10-K SEC filings** — Uber 2021 and Lyft 2020–2024 financial data
-- **Live internet** — Any query outside the above two domains via ARES API
+- **Live internet** — Any query outside the above two domains via SerpApi
 
 #### Assignment
 Implement **sub-query division** — split compound questions (e.g. *"What was Uber's and Lyft's revenue in 2021?"*) into individual sub-queries and process each one through the agentic pipeline independently.
@@ -180,9 +181,21 @@ The FAISS `IndexFlatL2` is rebuilt in-memory from the JSON file on every load, s
 ---
 
 ### 4. Agentic RAG with Semantic Cache
-**`Agentic_RAG_with_Semantic_Cache.ipynb`**
+**`Agentic_RAG_with_Semantic_Cache.ipynb`** + **`rag_helpers.py`**
 
 This notebook combines everything — it wraps the full three-way agentic RAG pipeline from Notebook 2 inside the semantic cache layer from Notebook 3. The result is a system that is both *intelligent* (routes queries to the right source) and *efficient* (avoids redundant calls for similar questions).
+
+All implementation lives in `rag_helpers.py` so the notebook stays minimal and focused on demonstrating system behaviour. After a `git clone` and a single `init_rag()` call, the entire pipeline is available via one function: `agentic_rag_with_cache(query, cache)`.
+
+#### `rag_helpers.py` — what's inside
+
+| Symbol | Type | Purpose |
+|---|---|---|
+| `init_rag(openai_api_key, serp_api_key, qdrant_path)` | function | One-time setup — loads Nomic model, wires OpenAI client, Qdrant, and SerpApi |
+| `SemanticCaching` | class | FAISS-backed cache with time-sensitivity filter, JSON persistence, `check_cache()` / `add_to_cache()` |
+| `get_internet_content(query)` | function | Live Google search via SerpApi |
+| `route_query(query)` | function | GPT-4o router returning `OPENAI_QUERY`, `10K_DOCUMENT_QUERY`, or `INTERNET_QUERY` |
+| `agentic_rag_with_cache(query, cache)` | function | **Public entry point** — cache check → route → retrieve → store → return |
 
 #### Full combined pipeline
 
@@ -197,12 +210,23 @@ User Query
                   │
                   └─ MISS ──▶ Agentic RAG router
                                   │
-                                  ├─ OPENAI_QUERY       ──▶ Qdrant (opnai_data) ──▶ GPT-4 RAG
-                                  ├─ 10K_DOCUMENT_QUERY ──▶ Qdrant (10k_data)   ──▶ GPT-4 RAG
-                                  └─ INTERNET_QUERY     ──▶ ARES API
+                                  ├─ OPENAI_QUERY       ──▶ Qdrant (opnai_data) ──▶ GPT-4o RAG
+                                  ├─ 10K_DOCUMENT_QUERY ──▶ Qdrant (10k_data)   ──▶ GPT-4o RAG
+                                  └─ INTERNET_QUERY     ──▶ SerpApi (live web)
                                   │
                                   └─ Store result in cache ──▶ Return response
 ```
+
+#### Minimal notebook structure
+
+| # | Section | What it does |
+|---|---|---|
+| 1 | Setup | `pip install` + `git clone` + `from rag_helpers import ...` |
+| 2 | API Keys | Load keys + `init_rag(...)` |
+| 3 | Create Cache | `cache = SemanticCaching(clear_on_init=True)` |
+| 4 | Pipeline reference | Markdown table pointing to `rag_helpers.py` |
+| 5 | Demo | 7 test cells, each a single `agentic_rag_with_cache(query, cache)` call |
+| 6 | Inspect | Cache state printout |
 
 ---
 
@@ -229,7 +253,7 @@ User Query
 | Similarity search / cache | `faiss-cpu` (IndexFlatL2) |
 | Document processing | `fitz` (PyMuPDF), `langchain_text_splitters` |
 | Async support | `asyncio`, `nest_asyncio` |
-| Web / live search | `requests`, ARES API, SerpApi, Traversaal Pro |
+| Web / live search | `requests`, SerpApi (Google Search API), Traversaal Pro |
 | Persistence | `json`, `python-dotenv` |
 | Numerics | `numpy`, `torch` |
 
@@ -241,17 +265,15 @@ User Query
 
 | Key | Used in |
 |---|---|
-| `OPENAI_API_KEY` | Query routing and RAG generation |
-| `ARES_API_KEY` | Live internet search (Agentic RAG notebook) |
-| `SERP_API_KEY` | Live Google search (Semantic Cache notebooks) |
-| `traversaal_pro_api_key` | Hosted RAG over AWS Guidebook |
+| `OPENAI_API_KEY` | Query routing and RAG generation (all notebooks) |
+| `SERP_API_KEY` | Live Google search (Agentic RAG, combined, and Semantic Cache notebooks) |
+| `traversaal_pro_api_key` | Hosted RAG over AWS Guidebook (Semantic Cache notebook only) |
 
 **On Google Colab** — add keys to the Secrets panel (lock icon in the left sidebar).
 
 **Locally** — create a `.env` file in `Module_3_Agentic_RAG/`:
 ```
 OPENAI_API_KEY=sk-...
-ARES_API_KEY=...
 SERP_API_KEY=...
 traversaal_pro_api_key=...
 ```

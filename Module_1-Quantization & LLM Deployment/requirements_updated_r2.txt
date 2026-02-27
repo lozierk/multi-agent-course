@@ -1,0 +1,13 @@
+# Core Engines
+unsloth
+vllm
+openai
+wandb
+cupy-cuda12x
+
+# Compatibility Layer (The "Must-Haves" for this specific setup)
+xformers<0.0.29
+trl<0.13.0
+peft
+accelerate
+bitsandbytes
